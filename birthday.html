@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color-dark: #1a1a24;
+            --bg-color-light: #fff0f5;
+            --cake-color: #f7cac9;
+            --icing-color: #fff;
+            --card-bg: #fff;
+        }
+
+        body {
+            background-color: var(--bg-color-dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            transition: background-color 2s ease-in-out, color 2s ease-in-out;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            gap: 2rem;
+        }
+
+        body.celebration {
+            background-color: var(--bg-color-light);
+            color: #333;
+        }
+
+        /* typography */
+        .script-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .cake-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 220px;
+            transition: transform 1s ease-in-out;
+        }
+
+        .celebration .cake-container {
+            transform: scale(0.8) translateY(20px);
+        }
+
+        .cake-tier {
+            background-color: var(--cake-color);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            box-shadow: inset 0px -5px 10px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .cake-bottom {
+            width: 220px;
+            height: 80px;
+            z-index: 1;
+        }
+
+        .cake-top {
+            width: 160px;
+            height: 70px;
+            z-index: 2;
+            background-color: #f3a8b0;
+        }
+
+        /* Icing drips */
+        .icing {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25px;
+            background-color: var(--icing-color);
+            border-radius: 10px 10px 15px 15px;
+        }
+
+        .icing::after, .icing::before {
+            content: '';
+            position: absolute;
+            background-color: var(--icing-color);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .icing::before {
+            width: 30px;
+            height: 40px;
+            left: 20px;
+            top: 10px;
+            box-shadow: 60px 10px 0 var(--icing-color), 120px 5px 0 var(--icing-color);
+        }
+
+        .icing::after {
+            width: 25px;
+            height: 30px;
+            left: 50px;
+            top: 15px;
+            box-shadow: 60px -5px 0 var(--icing-color), 110px 10px 0 var(--icing-color);
+        }
+
+        .candle {
+            width: 16px;
+            height: 60px;
+            background: repeating-linear-gradient(
+                45deg,
+                #fff,
+                #fff 5px,
+                #ff6b6b 5px,
+                #ff6b6b 10px
+            );
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            z-index: 3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .candle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 10px;
+            background-color: #333;
+        }
+
+        .flame {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 25px;
+            background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff6600 80%, rgba(255, 102, 0, 0) 100%);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            box-shadow: 0 0 20px 5px #ffcc00, 0 0 40px 10px #ff6600;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+            animation: flicker 0.1s infinite alternate;
+            z-index: 4;
+            filter: blur(1px);
+        }
+
+        .flame.lit {
+            opacity: 1;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1) rotate(-1deg); }
+            50% { transform: translateX(-50%) scale(1.05) rotate(1deg); }
+            100% { transform: translateX(-50%) scale(0.95) rotate(-2deg); }
+        }
+
+        /* Ambient light overlay for lit candle */
+        .ambient-light {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 45%, rgba(255, 200, 100, 0.15) 0%, rgba(0,0,0,0) 60%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s;
+            z-index: 1;
+        }
+        .lit-environment .ambient-light {
+            opacity: 1;
+        }
+
+        .card-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            backdrop-filter: blur(5px);
+        }
+
+        .card-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .birthday-card {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            transform: translateY(50px) scale(0.9);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #f7cac9;
+        }
+
+        .card-overlay.visible .birthday-card {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .card-decoration {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #f7cac9 0%, transparent 70%);
+            opacity: 0.3;
+            border-radius: 50%;
+        }
+
+        .card-dec-1 { top: -50px; left: -50px; }
+        .card-dec-2 { bottom: -50px; right: -50px; }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .ui-container {
+            z-index: 30;
+            min-height: 160px;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .hidden { display: none !important; }
+
+        .hint-text {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .celebration .hint-text {
+            color: #ff4757;
+            text-shadow: none;
+        }
+
+        #matchstick {
+            position: fixed;
+            width: 70px;
+            height: 6px;
+            background-color: #dcb38a;
+            border-radius: 3px;
+            cursor: grab;
+            z-index: 100;
+            transform: rotate(-30deg);
+            display: none; 
+            touch-action: none; /* Prevents screen scrolling while dragging on mobile */
+            transition: opacity 0.5s ease-out;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        #matchstick.floating {
+            animation: floatMatch 2s ease-in-out infinite;
+        }
+
+        @keyframes floatMatch {
+            0% { transform: translateY(0) rotate(-30deg); }
+            50% { transform: translateY(-10px) rotate(-30deg); }
+            100% { transform: translateY(0) rotate(-30deg); }
+        }
+
+        #matchHead {
+            position: absolute;
+            left: -8px;
+            top: -3px;
+            width: 15px;
+            height: 12px;
+            background-color: #8b2b2b;
+            border-radius: 50% 30% 30% 50%;
+        }
+
+        #matchFlame {
+            position: absolute;
+            left: -18px;
+            top: -35px;
+            width: 20px;
+            height: 35px;
+            background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff6600 80%, rgba(255, 102, 0, 0) 100%);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            opacity: 0;
+            pointer-events: none;
+            transform-origin: bottom center;
+            transform: rotate(30deg);
+            box-shadow: 0 0 15px 5px rgba(255, 204, 0, 0.6);
+        }
+
+        #matchFlame.lit {
+            opacity: 1;
+            animation: flicker 0.1s infinite alternate;
+        }
+
+        .strike-box {
+            width: 160px;
+            height: 45px;
+            background: #4e342e;
+            border: 3px solid #3e2723;
+            border-radius: 6px;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);
+            margin-top: 20px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light" id="ambientLight"></div>
+    
+    <div id="blowPressureContainer" class="hidden fixed right-4 md:right-8 top-1/2 transform -translate-y-1/2 w-6 md:w-10 h-48 md:h-64 bg-gray-900 rounded-full border-2 border-rose-400 overflow-hidden z-40 shadow-[0_0_15px_rgba(244,114,182,0.3)]">
+        <div id="blowPressureFill" class="absolute bottom-0 w-full h-0 bg-gradient-to-t from-rose-400 to-rose-600 transition-all duration-75"></div>
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span class="text-[10px] md:text-xs text-rose-200 -rotate-90 tracking-widest opacity-80 uppercase font-semibold">Blow</span>
+        </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <div class="cake-container" id="cakeContainer">
+        <!-- Cake Top Tier with Candle -->
+        <div class="cake-tier cake-top">
+            <div class="icing"></div>
+            <div class="candle">
+                <div id="wickHitbox" class="absolute w-12 h-12 -top-10 left-1/2 transform -translate-x-1/2 z-20"></div>
+                <div class="flame" id="candleFlame"></div>
+            </div>
+        </div>
+        <!-- Cake Bottom Tier -->
+        <div class="cake-tier cake-bottom">
+            <div class="icing"></div>
+        </div>
+    </div>
+
+    <!-- UI Interactions -->
+    <div class="ui-container relative flex flex-col items-center md:items-start md:absolute md:left-8 lg:left-24 md:top-1/2 md:-translate-y-1/2 gap-6 px-4 w-full max-w-lg md:max-w-sm mt-8 md:mt-0 text-center md:text-left">
+        <div id="textHint" class="hint-text script-font text-3xl md:text-4xl">Hey beautiful...</div>
+        
+        <div id="earphoneUI" class="flex flex-col items-center md:items-start">
+            <p class="text-lg opacity-90 mb-4">For the best experience, please put on your earphones! 🎧</p>
+            <button id="confirmEarphoneBtn" class="btn">I'm wearing them!</button>
+        </div>
+
+        <div id="matchUIContainer" class="hidden flex flex-col items-center md:items-start w-full">
+            <div id="matchbox" class="strike-box">
+                <span class="text-white/60 text-xs uppercase tracking-widest absolute inset-0 flex items-center justify-center pointer-events-none drop-shadow-md">Strike Here</span>
+            </div>
+        </div>
+        
+        <div id="blowUI" class="hidden flex flex-col items-center md:items-start w-full">
+            <p class="text-sm opacity-80 mb-4 max-w-[280px]">
+                (Make a wish and blow into your microphone to put out the candle!)
+            </p>
+            <button id="fallbackBlowBtn" class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-4 rounded-full transition opacity-50 hover:opacity-100">
+                Tap here if blowing doesn't work
+            </button>
+        </div>
+    </div>
+
+    <div id="matchstick">
+        <div id="matchHead"></div>
+        <div id="matchFlame"></div>
+    </div>
+
+    <!-- The Heartfelt Card Popup -->
+    <div class="card-overlay" id="cardOverlay">
+        <div class="birthday-card text-gray-800">
+            <div class="card-decoration card-dec-1"></div>
+            <div class="card-decoration card-dec-2"></div>
+            
+            <h1 class="script-font text-5xl text-rose-500 mb-6">Happy Birthday, My Love</h1>
+            
+            <!-- Replace this text with your actual heartfelt message -->
+            <p class="text-lg leading-relaxed mb-6 italic text-gray-700">
+                "Every day with you is a celebration, but today is extra special because it's the day the world was blessed with you. Thank you for your endless love, your beautiful smile, and for being my everything. Here's to making countless more memories together."
+            </p>
+            
+            <p class="font-semibold text-xl text-rose-400 script-font">
+                With all my heart,<br>Yours Forever ❤️
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let isCandleLit = false;
+        let isBlownOut = false;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let blowThreshold = 30; // Adjust if needed (volume level to detect blow)
+        let animationId;
+        let blowProgress = 0; // Tracks the 1.5s blow progress (0 to 100)
+        
+        let isDraggingMatch = false;
+        let isMatchLit = false;
+        let startX, startY, startLeft, startTop;
+
+        // DOM Elements
+        const flame = document.getElementById('candleFlame');
+        const blowUI = document.getElementById('blowUI');
+        const fallbackBlowBtn = document.getElementById('fallbackBlowBtn');
+        const textHint = document.getElementById('textHint');
+        const ambientLight = document.getElementById('ambientLight');
+        const cardOverlay = document.getElementById('cardOverlay');
+        const body = document.body;
+        
+        const earphoneUI = document.getElementById('earphoneUI');
+        const confirmEarphoneBtn = document.getElementById('confirmEarphoneBtn');
+        const blowPressureContainer = document.getElementById('blowPressureContainer');
+        const blowPressureFill = document.getElementById('blowPressureFill');
+        
+        const matchUIContainer = document.getElementById('matchUIContainer');
+        const matchbox = document.getElementById('matchbox');
+        const matchstick = document.getElementById('matchstick');
+        const matchHead = document.getElementById('matchHead');
+        const matchFlame = document.getElementById('matchFlame');
+        const wickHitbox = document.getElementById('wickHitbox');
+
+        async function setupMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                analyser.fftSize = 256;
+                microphone.connect(analyser);
+                
+                // Start listening for blow
+                detectBlow();
+            } catch (err) {
+                console.warn("Microphone access denied or unavailable. Fallback button can be used.", err);
+            }
+        }
+
+        function detectBlow() {
+            if (isBlownOut) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Calculate average volume
+            let sum = 0;
+            for(let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            let average = sum / bufferLength;
+
+            // Target duration is ~1.5 seconds. Assuming ~60 frames per second = 90 frames.
+            // Increment per frame: 100 / 90 ≈ 1.11
+            if (average > blowThreshold) {
+                blowProgress += 1.2; 
+            } else {
+                blowProgress -= 2.0; // Rapidly decay if she stops blowing
+            }
+            
+            // Constrain between 0 and 100
+            blowProgress = Math.max(0, Math.min(100, blowProgress));
+            
+            // Update the UI Pressure Bar
+            blowPressureFill.style.height = `${blowProgress}%`;
+
+            // Trigger when bar is full
+            if (blowProgress >= 100) {
+                triggerCelebration();
+            } else {
+                animationId = requestAnimationFrame(detectBlow);
+            }
+        }
+
+        function playHappyBirthday() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            // Note frequencies
+            const notes = {
+                'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99
+            };
+
+            // Melody sequence [note, duration in beats]
+            const melody = [
+                ['G4', 0.5], ['G4', 0.5], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2],
+                ['G4', 0.5], ['G4', 0.5], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2],
+                ['G4', 0.5], ['G4', 0.5], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 1],
+                ['F5', 0.5], ['F5', 0.5], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 2]
+            ];
+
+            const tempo = 120;
+            const beatDuration = 60 / tempo;
+            let startTime = audioContext.currentTime + 0.1;
+
+            melody.forEach(item => {
+                const note = item[0];
+                const duration = item[1] * beatDuration;
+                
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.type = 'sine'; // Soft, sweet tone
+                osc.frequency.value = notes[note];
+                
+                // Envelope for smooth notes
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.5, startTime + 0.05);
+                gain.gain.setValueAtTime(0.5, startTime + duration - 0.05);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+                
+                startTime += duration;
+            });
+        }
+
+        confirmEarphoneBtn.addEventListener('click', () => {
+            earphoneUI.classList.add('hidden');
+            textHint.innerHTML = "Pick up the match and strike it on the box! 🔥";
+            initializeMatch();
+        });
+
+        function initializeMatch() {
+            matchUIContainer.classList.remove('hidden');
+            matchstick.style.display = 'block';
+            
+            // Allow layout to render, then position matchstick nicely above the matchbox
+            setTimeout(() => {
+                const boxRect = matchbox.getBoundingClientRect();
+                matchstick.style.left = `${boxRect.left + 20}px`;
+                matchstick.style.top = `${boxRect.top - 70}px`;
+                matchstick.classList.add('floating');
+            }, 100);
+        }
+
+        matchstick.addEventListener('pointerdown', (e) => {
+            isDraggingMatch = true;
+            matchstick.classList.remove('floating');
+            matchstick.style.cursor = 'grabbing';
+            matchstick.setPointerCapture(e.pointerId);
+            
+            // Record starting positions
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseFloat(matchstick.style.left) || 0;
+            startTop = parseFloat(matchstick.style.top) || 0;
+        });
+
+        matchstick.addEventListener('pointermove', (e) => {
+            if (!isDraggingMatch) return;
+            
+            // Calculate exact distance moved to prevent orientation jumping
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            matchstick.style.left = `${startLeft + dx}px`;
+            matchstick.style.top = `${startTop + dy}px`;
+            
+            checkCollisions();
+        });
+
+        matchstick.addEventListener('pointerup', (e) => {
+            isDraggingMatch = false;
+            matchstick.style.cursor = 'grab';
+            matchstick.releasePointerCapture(e.pointerId);
+        });
+
+        function checkCollisions() {
+            const headRect = matchHead.getBoundingClientRect();
+            
+            if (!isMatchLit) {
+                // Check if striking matchbox
+                const boxRect = matchbox.getBoundingClientRect();
+                if (isIntersecting(headRect, boxRect)) {
+                    igniteMatch();
+                }
+            } else if (!isCandleLit) {
+                // Check if lighting candle wick
+                const wickRect = wickHitbox.getBoundingClientRect();
+                if (isIntersecting(headRect, wickRect)) {
+                    lightCandleWithMatch();
+                }
+            }
+        }
+
+        function isIntersecting(rect1, rect2) {
+            return !(rect1.right < rect2.left || 
+                     rect1.left > rect2.right || 
+                     rect1.bottom < rect2.top || 
+                     rect1.top > rect2.bottom);
+        }
+
+        function igniteMatch() {
+            isMatchLit = true;
+            matchFlame.classList.add('lit');
+            textHint.innerHTML = "Perfect! Now bring the flame to the candle wick. ✨";
+            
+            // Optional: Haptic feedback for mobile phones when it strikes
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        }
+
+        function lightCandleWithMatch() {
+            isCandleLit = true;
+            flame.classList.add('lit');
+            document.body.classList.add('lit-environment');
+            
+            // Clean up match UI
+            matchUIContainer.classList.add('hidden');
+            matchstick.style.opacity = '0';
+            setTimeout(() => { matchstick.style.display = 'none'; }, 500);
+            
+            // Bring up blow UI
+            blowUI.classList.remove('hidden');
+            blowPressureContainer.classList.remove('hidden');
+            textHint.innerHTML = "Make a beautiful wish and blow into your mic! 🌬️🎂";
+            
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            setupMicrophone();
+        }
+
+        fallbackBlowBtn.addEventListener('click', () => {
+            if(isCandleLit && !isBlownOut) {
+                triggerCelebration();
+            }
+        });
+
+        function triggerCelebration() {
+            isBlownOut = true;
+            if (animationId) cancelAnimationFrame(animationId);
+            if (microphone) microphone.disconnect();
+            
+            // Blow out animation
+            flame.classList.remove('lit');
+            flame.style.transition = "opacity 0.1s, transform 0.5s";
+            flame.style.transform = "translateX(-50%) scale(0) translateY(-20px)";
+            
+            document.body.classList.remove('lit-environment');
+            blowUI.classList.add('hidden');
+            blowPressureContainer.classList.add('hidden');
+            textHint.innerHTML = "Yay! Happy Birthday! 🎉";
+            textHint.classList.remove('text-white');
+            
+            // Start Celebration Events
+            setTimeout(() => {
+                body.classList.add('celebration');
+                startConfetti();
+                playHappyBirthday();
+                
+                // Show card after song starts
+                setTimeout(() => {
+                    cardOverlay.classList.add('visible');
+                    textHint.classList.add('hidden');
+                }, 3000);
+            }, 500);
+        }
+
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const confettiParticles = [];
+        const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#1dd1a1'];
+
+        function createConfetti() {
+            for (let i = 0; i < 150; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+        }
+
+        function drawConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confettiParticles.forEach((p, index) => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                ctx.restore();
+                
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.rotation += p.rotationSpeed;
+                
+                if (p.y > canvas.height) {
+                    confettiParticles.splice(index, 1);
+                }
+            });
+            
+            if (confettiParticles.length > 0 || isBlownOut) {
+                // Keep spawning slightly if celebration is on
+                if(confettiParticles.length < 50 && isBlownOut) {
+                    createConfetti();
+                }
+                requestAnimationFrame(drawConfetti);
+            }
+        }
+
+        function startConfetti() {
+            createConfetti();
+            drawConfetti();
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+</html>
